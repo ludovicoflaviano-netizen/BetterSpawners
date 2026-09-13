@@ -5,7 +5,7 @@ plugins {
     alias(libs.plugins.shadow) apply false
 }
 
-val targetJavaVersion = 21
+val targetJavaVersion = 25
 
 // Forced rather than constrained: only a forced version beats the `strictly` constraints
 // WorldEdit and PlotSquared declare.
@@ -128,7 +128,7 @@ allprojects {
 
     tasks.withType<JavaCompile>().configureEach {
         options.encoding = "UTF-8"
-        options.release.set(targetJavaVersion)
+        options.release.set(21)
     }
 }
 
