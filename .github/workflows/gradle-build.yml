@@ -71,11 +71,11 @@ jobs:
       - name: Generate Javadoc
         run: ./gradlew javadoc --no-daemon
 
-      - name: Upload SmartSpawner JAR
+      - name: Upload BetterSpawners JAR
         uses: actions/upload-artifact@v4
         with:
-          name: SmartSpawner-${{ steps.extract_version.outputs.version }}
-          path: core/build/libs/SmartSpawner-${{ steps.extract_version.outputs.version }}.jar
+          name: BetterSpawners-${{ steps.extract_version.outputs.version }}
+          path: core/build/libs/BetterSpawners-${{ steps.extract_version.outputs.version }}.jar
           retention-days: 90
           if-no-files-found: error
 
