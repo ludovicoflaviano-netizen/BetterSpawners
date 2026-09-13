@@ -69,6 +69,9 @@ public class SpawnerData {
     private Long lastSpawnTime;
     @Getter
     private long spawnDelay;
+    @Getter private long baseSpawnDelay;
+    @Getter private int baseSpawnerRange;
+    @Getter @Setter private int upgradeLevel;
 
     @Getter
     private EntityType entityType;
@@ -180,6 +183,7 @@ public class SpawnerData {
         this.spawnerStop = new AtomicBoolean(true);
         this.isAtCapacity = false;
         this.stackSize = 1;
+        this.upgradeLevel = 0;
         this.lastSpawnTime = System.currentTimeMillis();
         this.preferredSortItem = null; // Initialize sort preference as null
         this.accumulatedSellValue = new AtomicDouble(0);
@@ -192,9 +196,11 @@ public class SpawnerData {
         this.baseMinMobs = plugin.getConfig().getInt("spawner_properties.default.min_mobs", 1);
         this.baseMaxMobs = plugin.getConfig().getInt("spawner_properties.default.max_mobs", 4);
         this.maxStackSize = plugin.getConfig().getInt("spawner_properties.default.max_stack_size", 1000);
-        this.spawnDelay = plugin.getTimeFromConfig("spawner_properties.default.delay", "25s");
+        this.baseSpawnDelay = plugin.getTimeFromConfig("spawner_properties.default.delay", "25s");
+        this.spawnDelay = this.baseSpawnDelay;
         this.cachedSpawnDelay = (this.spawnDelay + 20L) * 50L; // Add 1 second buffer for GUI display and convert tick to ms
-        this.spawnerRange = plugin.getConfig().getInt("spawner_properties.default.range", 16);
+        this.baseSpawnerRange = plugin.getConfig().getInt("spawner_properties.default.range", 16);
+        this.spawnerRange = this.baseSpawnerRange;
 
         // Load loot config based on spawner type
         if (isItemSpawner() && spawnedItemMaterial != null) {
@@ -247,11 +253,19 @@ public class SpawnerData {
     }
 
     private void calculateStackBasedValues() {
-        this.maxStoredExp = clampToLong(baseMaxStoredExp * stackSize, 0L, Long.MAX_VALUE);
-        this.maxStoragePages = clampToInt((long) baseMaxStoragePages * stackSize, 0, Integer.MAX_VALUE);
+        int level = Math.max(0, Math.min(10, upgradeLevel));
+        double productionMultiplier = 1.0D + (level * 0.15D);
+        double storageMultiplier = 1.0D + (level * 0.25D);
+        double speedMultiplier = Math.max(0.50D, 1.0D - (level * 0.05D));
+        this.maxStoredExp = clampToLong((long) Math.floor(baseMaxStoredExp * stackSize * storageMultiplier), 0L, Long.MAX_VALUE);
+        this.maxStoragePages = clampToInt((long) Math.floor(baseMaxStoragePages * stackSize * storageMultiplier), 0, Integer.MAX_VALUE);
         setMaxSpawnerLootSlots(clampToInt((long) maxStoragePages * 45L, 0, Integer.MAX_VALUE));
-        this.minMobs = clampToInt((long) baseMinMobs * stackSize, 0, Integer.MAX_VALUE);
-        this.maxMobs = clampToInt((long) baseMaxMobs * stackSize, 0, Integer.MAX_VALUE);
+        this.minMobs = clampToInt((long) Math.ceil(baseMinMobs * stackSize * productionMultiplier), 0, Integer.MAX_VALUE);
+        this.maxMobs = clampToInt((long) Math.ceil(baseMaxMobs * stackSize * productionMultiplier), 0, Integer.MAX_VALUE);
+        this.spawnerRange = Math.min(64, baseSpawnerRange + (level / 2));
+        this.spawnDelay = Math.max(1L, (long) Math.ceil(baseSpawnDelay * speedMultiplier));
+        long ticksWithBuffer = this.spawnDelay > Long.MAX_VALUE - 20L ? Long.MAX_VALUE : this.spawnDelay + 20L;
+        this.cachedSpawnDelay = ticksWithBuffer > Long.MAX_VALUE / 50L ? Long.MAX_VALUE : ticksWithBuffer * 50L;
         this.spawnerExp = clampToLong(this.spawnerExp, 0L, this.maxStoredExp);
     }
 
@@ -270,9 +284,8 @@ public class SpawnerData {
     }
 
     public void setSpawnDelay(long baseSpawnerDelay) {
-        this.spawnDelay = baseSpawnerDelay > 0 ? baseSpawnerDelay : 500;
-        long ticksWithBuffer = this.spawnDelay > Long.MAX_VALUE - 20L ? Long.MAX_VALUE : this.spawnDelay + 20L;
-        this.cachedSpawnDelay = ticksWithBuffer > Long.MAX_VALUE / 50L ? Long.MAX_VALUE : ticksWithBuffer * 50L;
+        this.baseSpawnDelay = baseSpawnerDelay > 0 ? baseSpawnerDelay : 500;
+        calculateStackBasedValues();
         if (baseSpawnerDelay <= 0) {
             plugin.getLogger().warning("Invalid spawner delay value. Setting to default: 500 ticks (25s)");
         }
@@ -313,6 +326,18 @@ public class SpawnerData {
         this.hologram = new SpawnerHologram(spawnerLocation);
         this.hologram.createHologram();
         updateHologramData();
+    }
+
+    public void setSpawnerRange(Integer spawnerRange) {
+        this.baseSpawnerRange = Math.max(1, spawnerRange == null ? 16 : spawnerRange);
+        calculateStackBasedValues();
+    }
+
+    public void setUpgradeLevel(int level) {
+        this.upgradeLevel = Math.max(0, Math.min(10, level));
+        calculateStackBasedValues();
+        updateHologramData();
+        if (plugin.getSpawnerMenuUI() != null) plugin.getSpawnerMenuUI().invalidateSpawnerCache(this.spawnerId);
     }
 
     public void setStackSize(int stackSize) {

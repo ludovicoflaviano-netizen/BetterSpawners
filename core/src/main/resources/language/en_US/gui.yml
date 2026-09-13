@@ -114,6 +114,45 @@ exp_info_item:
     - ''
     - '&#5DB5F1 ▸ Click to collect EXP!'
 
+# Spawner upgrades
+spawner_upgrade_item:
+  name: '&fᴜᴘɢʀᴀᴅᴇ &#5DB5F1ꜱᴘᴀᴡɴᴇʀ'
+  lore:
+    - ''
+    - ' &#5DB5F1★ &fLevel: &e{level}&7/&e{max_level}'
+    - ''
+    - ' &8• &fIncrease production, storage,'
+    - '   &fspawn speed, and range.'
+    - ''
+    - '&#5DB5F1 ▸ Click to open upgrades'
+
+spawner_upgrade_info:
+  name: '&fꜱᴘᴀᴡɴᴇʀ &#5DB5F1ᴜᴘɢʀᴀᴅᴇꜱ'
+  lore:
+    - ''
+    - ' &#5DB5F1ℹ &fCurrent level: &e{level}&7/&e{max_level}'
+    - ''
+    - ' &8• &fEvery level improves the spawner.'
+    - ' &8• &fCosts increase aggressively.'
+
+spawner_upgrade_button:
+  name: '&fᴜᴘɢʀᴀᴅᴇ &#5DB5F1ʟᴇᴠᴇʟ {next_level}'
+  lore:
+    - ''
+    - ' &8• &fCurrent: &e{level}'
+    - ' &8• &fPrice: &a${cost}'
+    - ''
+    - '&#5DB5F1 ▸ Click to purchase'
+
+spawner_upgrade_stats:
+  name: '&fɴᴇxᴛ &#5DB5F1ᴜᴘɢʀᴀᴅᴇ'
+  lore:
+    - ''
+    - ' &#5DB5F1★ &fProduction: &e{mobs} &7→ &a{next_mobs}'
+    - ' &#5DB5F1★ &fStorage: &e{storage} &7→ &a{next_storage}'
+    - ' &#5DB5F1★ &fDelay: &e{delay} &7→ &a{next_delay}'
+    - ' &#5DB5F1★ &fRange: &e{range} &7→ &a{next_range}'
+
 # ──────────────────────────────────────────────────────
 #                Sell Confirmation GUI
 # ──────────────────────────────────────────────────────

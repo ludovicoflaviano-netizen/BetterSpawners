@@ -5,7 +5,7 @@ plugins {
     alias(libs.plugins.shadow) apply false
 }
 
-val targetJavaVersion = 25
+val targetJavaVersion = 21
 
 // Forced rather than constrained: only a forced version beats the `strictly` constraints
 // WorldEdit and PlotSquared declare.
@@ -18,7 +18,7 @@ allprojects {
     apply(plugin = "maven-publish")
 
     group = "github.nighter"
-    version = "1.8.2"
+    version = "2.0.0"
 
     repositories {
         mavenCentral()

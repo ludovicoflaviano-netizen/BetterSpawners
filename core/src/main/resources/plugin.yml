@@ -1,4 +1,4 @@
-name: SmartSpawner
+name: BetterSpawners
 version: '${version}'
 main: github.nighter.smartspawner.SmartSpawner
 api-version: '1.21'

@@ -144,6 +144,9 @@ public class SpawnerMenuUI {
                     action = "none";
                 }
                 switch (action) {
+                    case "open_upgrades":
+                        item = createUpgradeItem(spawner);
+                        break;
                     case "open_storage":
                         item = createLootStorageItem(spawner, button);
                         break;
@@ -662,6 +665,16 @@ public class SpawnerMenuUI {
      * unrecognized one). It renders the configured material or custom head so the button
      * stays visible in the menu based on its layout key alone.
      */
+    private ItemStack createUpgradeItem(SpawnerData spawner) {
+        ItemStack item = new ItemStack(Material.NETHER_STAR);
+        Map<String, String> p = Map.of("level", String.valueOf(spawner.getUpgradeLevel()), "max_level", String.valueOf(github.nighter.smartspawner.spawner.gui.upgrade.SpawnerUpgradeUI.MAX_LEVEL));
+        item.editMeta(meta -> {
+            meta.setDisplayName(languageManager.getGuiItemName("spawner_upgrade_item.name", p));
+            meta.lore(languageManager.buildGuiLoreAsComponents("spawner_upgrade_item.lore", p, Collections.emptyList(), null));
+        });
+        return item;
+    }
+
     private ItemStack createStaticItem(GuiButton button) {
         ItemStack item;
         if (button.getMaterial() == Material.PLAYER_HEAD

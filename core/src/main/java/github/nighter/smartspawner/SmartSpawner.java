@@ -47,6 +47,8 @@ import github.nighter.smartspawner.spawner.gui.layout.GuiLayoutConfig;
 import github.nighter.smartspawner.spawner.gui.layout.GuiButtonInteractionService;
 import github.nighter.smartspawner.spawner.gui.main.SpawnerMenuAction;
 import github.nighter.smartspawner.spawner.gui.main.SpawnerMenuUI;
+import github.nighter.smartspawner.spawner.gui.upgrade.SpawnerUpgradeAction;
+import github.nighter.smartspawner.spawner.gui.upgrade.SpawnerUpgradeUI;
 import github.nighter.smartspawner.spawner.gui.sell.SpawnerSellConfirmListener;
 import github.nighter.smartspawner.spawner.gui.sell.SpawnerSellConfirmUI;
 import github.nighter.smartspawner.spawner.gui.storage.SpawnerStorageAction;
@@ -115,6 +117,8 @@ public class SmartSpawner extends JavaPlugin implements SmartSpawnerPlugin {
     private SpawnerStorageUI spawnerStorageUI;
     private FilterConfigUI filterConfigUI;
     private SpawnerSellConfirmUI spawnerSellConfirmUI;
+    private SpawnerUpgradeUI spawnerUpgradeUI;
+    private SpawnerUpgradeAction spawnerUpgradeAction;
 
     // Core handlers
     private SpawnEggHandler spawnEggHandler;
@@ -389,6 +393,8 @@ public class SmartSpawner extends JavaPlugin implements SmartSpawnerPlugin {
         this.spawnerMenuAction = new SpawnerMenuAction(this);
         this.spawnerStorageAction = new SpawnerStorageAction(this);
         this.spawnerSellConfirmListener = new SpawnerSellConfirmListener(this);
+        this.spawnerUpgradeUI = new SpawnerUpgradeUI(this);
+        this.spawnerUpgradeAction = new SpawnerUpgradeAction(this, spawnerUpgradeUI);
     }
 
     private void initializeListeners() {
@@ -430,6 +436,7 @@ public class SmartSpawner extends JavaPlugin implements SmartSpawnerPlugin {
         pm.registerEvents(pricesGUI, this);
         pm.registerEvents(lootEditorHandler, this);
         pm.registerEvents(spawnerSellConfirmListener, this);
+        pm.registerEvents(spawnerUpgradeAction, this);
         pm.registerEvents(guiButtonInteractionService, this);
 
         // Register near-command listener (player quit cleanup)

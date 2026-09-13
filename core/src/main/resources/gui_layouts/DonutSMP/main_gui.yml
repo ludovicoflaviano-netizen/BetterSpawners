@@ -67,3 +67,12 @@ slot_16:
     action: "collect_exp"
     sound_success: entity.experience_orb.pickup
     sound_fail: block.note_block.pling
+
+
+# Expensive money upgrade system
+slot_18:
+  material: NETHER_STAR
+  enabled: true
+  click:
+    action: "open_upgrades"
+    sound: block.beacon.activate

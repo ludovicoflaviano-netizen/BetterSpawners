@@ -54,7 +54,7 @@ public class SpawnerDatabaseHandler implements SpawnerStorage {
     // SQL Statements
     private static final String SELECT_COLUMNS = """
             spawner_id, world, loc_x, loc_y, loc_z,
-            entity_type, itemspawner_type, config_name, stack_size, max_stack_size,
+            upgrade_level, entity_type, itemspawner_type, config_name, stack_size, max_stack_size,
             active, stop, activation_range, delay, last_spawn_time, min_mobs, max_mobs,
             max_loot_slots, is_at_capacity, exp, max_stored_exp,
             last_interacted_player, preferred_sort_item, filtered_items, storage_items
@@ -64,11 +64,11 @@ public class SpawnerDatabaseHandler implements SpawnerStorage {
     private static final String UPSERT_SQL_MYSQL = """
             INSERT INTO %s (
                 spawner_id, world, loc_x, loc_y, loc_z, chunk_x, chunk_z,
-                entity_type, itemspawner_type, stack_size, max_stack_size,
+                upgrade_level, entity_type, itemspawner_type, stack_size, max_stack_size,
                 active, stop, activation_range, delay, last_spawn_time, min_mobs, max_mobs,
                 max_loot_slots, is_at_capacity, total_items, exp, max_stored_exp,
                 last_interacted_player, preferred_sort_item, filtered_items, storage_items, config_name
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON DUPLICATE KEY UPDATE
                 world = VALUES(world),
                 loc_x = VALUES(loc_x),
@@ -76,6 +76,7 @@ public class SpawnerDatabaseHandler implements SpawnerStorage {
                 loc_z = VALUES(loc_z),
                 chunk_x = VALUES(chunk_x),
                 chunk_z = VALUES(chunk_z),
+                upgrade_level = VALUES(upgrade_level),
                 entity_type = VALUES(entity_type),
                 itemspawner_type = VALUES(itemspawner_type),
                 stack_size = VALUES(stack_size),
@@ -103,11 +104,11 @@ public class SpawnerDatabaseHandler implements SpawnerStorage {
     private static final String UPSERT_SQL_SQLITE = """
             INSERT INTO %s (
                 spawner_id, world, loc_x, loc_y, loc_z, chunk_x, chunk_z,
-                entity_type, itemspawner_type, stack_size, max_stack_size,
+                upgrade_level, entity_type, itemspawner_type, stack_size, max_stack_size,
                 active, stop, activation_range, delay, last_spawn_time, min_mobs, max_mobs,
                 max_loot_slots, is_at_capacity, total_items, exp, max_stored_exp,
                 last_interacted_player, preferred_sort_item, filtered_items, storage_items, config_name
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(spawner_id) DO UPDATE SET
                 world = excluded.world,
                 loc_x = excluded.loc_x,
@@ -115,6 +116,7 @@ public class SpawnerDatabaseHandler implements SpawnerStorage {
                 loc_z = excluded.loc_z,
                 chunk_x = excluded.chunk_x,
                 chunk_z = excluded.chunk_z,
+                upgrade_level = excluded.upgrade_level,
                 entity_type = excluded.entity_type,
                 itemspawner_type = excluded.itemspawner_type,
                 stack_size = excluded.stack_size,
@@ -430,27 +432,28 @@ public class SpawnerDatabaseHandler implements SpawnerStorage {
         stmt.setInt(5, loc.getBlockZ());
         stmt.setInt(6, loc.getBlockX() >> 4);
         stmt.setInt(7, loc.getBlockZ() >> 4);
-        stmt.setString(8, spawner.getEntityType().name());
-        stmt.setString(9, spawner.isItemSpawner() ? spawner.getSpawnedItemMaterial().name() : null);
-        stmt.setInt(10, spawner.getStackSize());
-        stmt.setInt(11, spawner.getMaxStackSize());
-        stmt.setBoolean(12, spawner.getSpawnerActive());
-        stmt.setBoolean(13, spawner.getSpawnerStop().get());
-        stmt.setInt(14, spawner.getSpawnerRange());
-        stmt.setLong(15, spawner.getSpawnDelay());
-        stmt.setLong(16, spawner.getLastSpawnTime());
-        stmt.setInt(17, spawner.getMinMobs());
-        stmt.setInt(18, spawner.getMaxMobs());
-        stmt.setInt(19, spawner.getMaxSpawnerLootSlots());
-        stmt.setBoolean(20, spawner.getIsAtCapacity());
-        stmt.setLong(21, totalItems);
-        stmt.setLong(22, Math.max(0L, spawner.getSpawnerExp()));
-        stmt.setLong(23, spawner.getMaxStoredExp());
-        stmt.setString(24, spawner.getLastInteractedPlayer());
-        stmt.setString(25, spawner.getPreferredSortItem() != null ? spawner.getPreferredSortItem().name() : null);
-        stmt.setString(26, serializeFilteredItems(spawner.getFilteredItems()));
-        stmt.setBytes(27, items);
-        stmt.setString(28, spawner.getConfigName());
+        stmt.setInt(8, spawner.getUpgradeLevel());
+        stmt.setString(9, spawner.getEntityType().name());
+        stmt.setString(10, spawner.isItemSpawner() ? spawner.getSpawnedItemMaterial().name() : null);
+        stmt.setInt(11, spawner.getStackSize());
+        stmt.setInt(12, spawner.getMaxStackSize());
+        stmt.setBoolean(13, spawner.getSpawnerActive());
+        stmt.setBoolean(14, spawner.getSpawnerStop().get());
+        stmt.setInt(15, spawner.getSpawnerRange());
+        stmt.setLong(16, spawner.getBaseSpawnDelay());
+        stmt.setLong(17, spawner.getLastSpawnTime());
+        stmt.setInt(18, spawner.getMinMobs());
+        stmt.setInt(19, spawner.getMaxMobs());
+        stmt.setInt(20, spawner.getMaxSpawnerLootSlots());
+        stmt.setBoolean(21, spawner.getIsAtCapacity());
+        stmt.setLong(22, totalItems);
+        stmt.setLong(23, Math.max(0L, spawner.getSpawnerExp()));
+        stmt.setLong(24, spawner.getMaxStoredExp());
+        stmt.setString(25, spawner.getLastInteractedPlayer());
+        stmt.setString(26, spawner.getPreferredSortItem() != null ? spawner.getPreferredSortItem().name() : null);
+        stmt.setString(27, serializeFilteredItems(spawner.getFilteredItems()));
+        stmt.setBytes(28, items);
+        stmt.setString(29, spawner.getConfigName());
         return true;
     }
 
@@ -581,6 +584,7 @@ public class SpawnerDatabaseHandler implements SpawnerStorage {
         }
 
         // Load settings
+        spawner.setUpgradeLevel(rs.getInt("upgrade_level"));
         spawner.setSpawnerExpData(rs.getLong("exp"));
         spawner.setSpawnerActive(rs.getBoolean("active"));
         spawner.setSpawnerRange(rs.getInt("activation_range"));

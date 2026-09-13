@@ -133,6 +133,10 @@ public class SpawnerMenuAction implements Listener {
         }
 
         switch (action) {
+            case "open_upgrades":
+                if (!plugin.getGuiButtonInteractionService().tryUse(player, GuiLayoutType.MAIN_GUI, button)) return true;
+                plugin.getSpawnerUpgradeUI().open(player, spawner);
+                return true;
             case "open_storage":
                 if (!plugin.getGuiButtonInteractionService().tryUse(player, GuiLayoutType.MAIN_GUI, button)) {
                     return true;

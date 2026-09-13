@@ -108,6 +108,7 @@ public class DatabaseManager {
                 loc_z INT NOT NULL,
                 chunk_x INT NOT NULL DEFAULT 0,
                 chunk_z INT NOT NULL DEFAULT 0,
+                upgrade_level INT NOT NULL DEFAULT 0,
 
                 -- What the spawner spawns. itemspawner_type is only set when entity_type is ITEM
                 entity_type VARCHAR(64) NOT NULL,
@@ -166,6 +167,7 @@ public class DatabaseManager {
                 loc_z INT NOT NULL,
                 chunk_x INT NOT NULL DEFAULT 0,
                 chunk_z INT NOT NULL DEFAULT 0,
+                upgrade_level INT NOT NULL DEFAULT 0,
 
                 -- What the spawner spawns. itemspawner_type is only set when entity_type is ITEM
                 entity_type VARCHAR(64) NOT NULL,
@@ -217,7 +219,7 @@ public class DatabaseManager {
 
     private static final String SCHEMA_VERSION_KEY = "schema_version";
     private static final int LEGACY_SCHEMA_VERSION = 1;
-    private static final int CURRENT_SCHEMA_VERSION = 4;
+    private static final int CURRENT_SCHEMA_VERSION = 5;
 
     /** Rows converted per transaction while rewriting inventories during the v3 migration. */
     private static final int MIGRATION_BATCH_SIZE = 250;
@@ -554,7 +556,7 @@ public class DatabaseManager {
      */
     private static final String REBUILD_COLUMNS = """
             id, spawner_id, world, loc_x, loc_y, loc_z, chunk_x, chunk_z,
-            entity_type, itemspawner_type, stack_size, max_stack_size,
+            upgrade_level, entity_type, itemspawner_type, stack_size, max_stack_size,
             active, stop, activation_range, delay, last_spawn_time, min_mobs, max_mobs,
             max_loot_slots, is_at_capacity, total_items, exp, max_stored_exp,
             last_interacted_player, preferred_sort_item, filtered_items, storage_items
@@ -724,6 +726,7 @@ public class DatabaseManager {
             case 2 -> migrateXpColumnsToBigIntIfNeeded();
             case 3 -> migrateToChunkAndItemBlobColumns();
             case 4 -> addColumnIfMissing("config_name", "VARCHAR(128) DEFAULT NULL");
+            case 5 -> addColumnIfMissing("upgrade_level", "INT NOT NULL DEFAULT 0");
             default -> throw new SQLException("No database migration handler found for schema version: " + targetVersion);
         }
     }
